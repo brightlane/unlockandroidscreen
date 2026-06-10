@@ -1,21 +1,40 @@
-# Unlock Android Screen — Global SEO Site
+name: Deploy Unlock Android Screen Site
 
-Affiliate: https://www.linkconnector.com/ta.php?lc=007949070197004532&atid=androidlockscreen  
-Live URL: https://brightlane.github.io/unlockandroidscreen/
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-## Stats
-| Section | Count |
-|---------|-------|
-| Core pages | 11 |
-| Brand pages | 20 |
-| Language pages | 24 |
-| **Total HTML pages** | **55** |
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-## Languages
-English, Deutsch, Français, Español, Português, Italiano, 日本語, 中文, 한국어, Русский, العربية, हिन्दी, Indonesia, Nederlands, Polski, Türkçe, Svenska, Filipino, Tiếng Việt, ภาษาไทย, Melayu, বাংলা, Українська, Română, Čeština
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
-## Brands
-Samsung, Huawei, Xiaomi, OPPO, Vivo, LG, Motorola, OnePlus, Nokia, Sony, Realme, ZTE, Lenovo, Asus, Google Pixel, TCL, Honor, Infinix, Tecno, itel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build site
+        run: python3 build.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-## Deploy
-Settings → Pages → Source → GitHub Actions → push to `main`
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
